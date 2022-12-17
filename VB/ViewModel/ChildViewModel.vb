@@ -1,45 +1,50 @@
-﻿Imports DevExpress.Mvvm
+Imports DevExpress.Mvvm
 Imports System.Windows.Input
 
 Namespace Example.ViewModel
+
     Public Class ChildViewModel
         Implements ISupportServices, ISupportParentViewModel
 
+        Private _ShowMessageCommand As ICommand
 
-        Private serviceContainer_Renamed As IServiceContainer = Nothing
-        Protected ReadOnly Property ServiceContainer() As IServiceContainer
-            Get
-                If serviceContainer_Renamed Is Nothing Then
-                    serviceContainer_Renamed = New ServiceContainer(Me)
-                End If
-                Return serviceContainer_Renamed
-            End Get
-        End Property
-        Private ReadOnly Property ISupportServices_ServiceContainer() As IServiceContainer Implements ISupportServices.ServiceContainer
-            Get
-                Return ServiceContainer
-            End Get
-        End Property
-        Private Property ISupportParentViewModel_ParentViewModel() As Object Implements ISupportParentViewModel.ParentViewModel
+        Private serviceContainerField As IServiceContainer = Nothing
 
-        Private ReadOnly Property MessageBoxService() As IMessageBoxService
+        Protected ReadOnly Property ServiceContainerProp As IServiceContainer
             Get
-                Return ServiceContainer.GetService(Of IMessageBoxService)(ServiceSearchMode.PreferParents)
+                If serviceContainerField Is Nothing Then serviceContainerField = New ServiceContainer(Me)
+                Return serviceContainerField
             End Get
         End Property
 
-        Private privateShowMessageCommand As ICommand
-        Public Property ShowMessageCommand() As ICommand
+        Private ReadOnly Property ServiceContainer As IServiceContainer Implements ISupportServices.ServiceContainer
             Get
-                Return privateShowMessageCommand
+                Return ServiceContainerProp
             End Get
+        End Property
+
+        Private Property ParentViewModel As Object Implements ISupportParentViewModel.ParentViewModel
+
+        Private ReadOnly Property MessageBoxService As IMessageBoxService
+            Get
+                Return ServiceContainerProp.GetService(Of IMessageBoxService)(ServiceSearchMode.PreferParents)
+            End Get
+        End Property
+
+        Public Property ShowMessageCommand As ICommand
+            Get
+                Return _ShowMessageCommand
+            End Get
+
             Private Set(ByVal value As ICommand)
-                privateShowMessageCommand = value
+                _ShowMessageCommand = value
             End Set
         End Property
+
         Public Sub New()
             ShowMessageCommand = New DelegateCommand(AddressOf ShowMessage)
         End Sub
+
         Private Sub ShowMessage()
             MessageBoxService.Show("This is ChildView")
         End Sub
